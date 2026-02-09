@@ -7,6 +7,9 @@ import 'package:flutter/foundation.dart';
 import 'package:roguelike_dungeon/data/floor_node.dart';
 import 'package:roguelike_dungeon/game/dungeon/attack_hitbox_component.dart';
 import 'package:roguelike_dungeon/game/dungeon/dungeon_room_component.dart';
+import 'package:roguelike_dungeon/game/dungeon/enemy_projectile_component.dart';
+import 'package:roguelike_dungeon/game/dungeon/explosion_damage_component.dart';
+import 'package:roguelike_dungeon/game/entities/enemy_component.dart';
 import 'package:roguelike_dungeon/game/entities/player_component.dart';
 import 'package:roguelike_dungeon/game/rooms/floor_generator.dart';
 import 'package:roguelike_dungeon/services/services.dart';
@@ -38,6 +41,14 @@ class DungeonGame extends FlameGame
   final ValueNotifier<double> playerMaxHpNotifier = ValueNotifier(100);
 
   int get currentFloor => _currentFloor;
+
+  /// For enemies and projectiles. Null if not in dungeon.
+  PlayerComponent? get player => _player;
+
+  /// Called when an enemy or hazard damages the player.
+  void damagePlayer(double amount) {
+    _player.stats.takeDamage(amount);
+  }
 
   /// Called from overlay (virtual joystick).
   void setMovementDirection(double dx, double dy) {
@@ -86,6 +97,7 @@ class DungeonGame extends FlameGame
   /// Load first floor and first room. Call after [ConfigLoader.loadRoomPresets].
   Future<void> startDungeon() async {
     await Services.configLoader.loadRoomPresets();
+    await Services.configLoader.loadEnemyArchetypes();
     _currentFloor = 1;
     _previousFloorHadLucky = false;
     _floorNodes = FloorGenerator(_random).generate(_currentFloor,
@@ -102,6 +114,9 @@ class DungeonGame extends FlameGame
 
     world.removeAll(world.children.whereType<DungeonRoomComponent>());
     world.removeAll(world.children.whereType<PlayerComponent>());
+    world.removeAll(world.children.whereType<EnemyComponent>());
+    world.removeAll(world.children.whereType<EnemyProjectileComponent>());
+    world.removeAll(world.children.whereType<ExplosionDamageComponent>());
 
     final room = DungeonRoomComponent(node: node);
     world.add(room);
@@ -113,7 +128,40 @@ class DungeonGame extends FlameGame
     _player = PlayerComponent(position: Vector2(px, py));
     world.add(_player);
 
+    _spawnEnemiesInRoom(node, ts);
     camera.follow(_player, snap: true);
+  }
+
+  void _spawnEnemiesInRoom(FloorNode node, double tileSize) {
+    final tags = node.definition.tags;
+    final isCombat = tags.contains('combat');
+    final isBoss = tags.contains('boss');
+    if (!isCombat && !isBoss) return;
+
+    final archetypes = Services.configLoader.archetypesForFloor(_currentFloor);
+    if (archetypes.isEmpty) return;
+
+    final roomW = node.definition.widthTiles * tileSize;
+    final roomH = node.definition.heightTiles * tileSize;
+    const margin = 2.0;
+    final minX = margin * tileSize;
+    final minY = margin * tileSize;
+    final maxX = roomW - margin * tileSize;
+    final maxY = roomH - margin * tileSize;
+    if (maxX <= minX || maxY <= minY) return;
+
+    final count = isBoss
+        ? 1
+        : (1 + _currentFloor + _random.nextInt(2)).clamp(1, 8);
+    for (var i = 0; i < count; i++) {
+      final archetype = archetypes[_random.nextInt(archetypes.length)];
+      final x = minX + _random.nextDouble() * (maxX - minX);
+      final y = minY + _random.nextDouble() * (maxY - minY);
+      world.add(EnemyComponent(
+        position: Vector2(x, y),
+        archetype: archetype,
+      ));
+    }
   }
 
   void _goToNextFloor() {

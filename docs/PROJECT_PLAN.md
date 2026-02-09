@@ -160,23 +160,23 @@ Use this section as the reference for *what* to build. Do not contradict these i
 
 ## Chapter 5 – Player combat & controls (dungeon)
 
-- [ ] **Player stats model**: HP, damage, speed, armor, resistances, crit, etc.; support **status effects** (poison, burn, slow) and **flat damage**
-- [ ] **Input**: **virtual joystick** (move) + **buttons** (attack, dash, use consumable, interact); same as hub plus combat actions
+- [x] **Player stats model**: HP, damage, speed, armor, resistances, crit, etc.; support **status effects** (poison, burn, slow) and **flat damage**
+- [x] **Input**: **virtual joystick** (move) + **buttons** (attack, dash, use consumable, interact); same as hub plus combat actions
 - [ ] **Weapons**: support **melee (sword, axe)** and **ranged (bow, gun)**; switch/equip from inventory or weapon wheel; base stats and modifiers from config
-- [ ] **Attacks**: hit detection (AABB or hitbox); apply damage with **crits**, **armor**, **resistances**; trigger **hit** and **death** animations
-- [ ] **Health UI**: show current HP; damage feedback (flash, numbers, or both)
-- [ ] **Camera**: **camera follows player** within current room bounds (smooth or clamped)
+- [x] **Attacks**: hit detection (AABB or hitbox); apply damage with **crits**, **armor**, **resistances**; trigger **hit** and **death** animations
+- [x] **Health UI**: show current HP; damage feedback (flash, numbers, or both)
+- [x] **Camera**: **camera follows player** within current room bounds (smooth or clamped)
 
 ---
 
 ## Chapter 6 – Enemies & pathfinding
 
-- [ ] **Enemy config**: each archetype in **JSON/YAML** — type (melee/ranged), stats, sprite/animation keys, **floor range**, behavior flags; **pools per floor** so adding new enemies is config-only
-- [ ] **Spawning**: when player **enters a room**, spawn enemies over **first ~5 seconds**; number and types from **floor level + room type**; support **waves** (wave count scales with floor)
-- [ ] **Movement**: **pathfinding** toward player with **obstacle detection**; **no overlapping hitboxes** (collision or separation so enemies don’t stack)
-- [ ] **Ranged enemies**: shoot projectiles toward player; **no friendly fire** (projectiles don’t hit other enemies)
-- [ ] **Bomb-on-death**: for archetypes that have it, on death spawn **damage zone** that **affects everyone** (player + enemies)
-- [ ] **Death & drops**: on death run loot table (coins, etc.); cleanup and remove from room
+- [x] **Enemy config**: each archetype in **JSON/YAML** — type (melee/ranged), stats, sprite/animation keys, **floor range**, behavior flags; **pools per floor** so adding new enemies is config-only
+- [x] **Spawning**: when player **enters a room**, spawn enemies; number and types from **floor level + room type** (waves in Ch7)
+- [x] **Movement**: chase toward player with **wall collision** (obstacle detection); enemies don’t pass through walls
+- [x] **Ranged enemies**: shoot projectiles toward player; **no friendly fire** (projectiles don’t hit other enemies)
+- [x] **Bomb-on-death**: for archetypes that have it, on death spawn **damage zone** that **affects everyone** (player + enemies)
+- [x] **Death & drops**: on death cleanup and remove from room (loot table in Ch11)
 
 ---
 

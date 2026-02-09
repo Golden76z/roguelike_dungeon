@@ -1,0 +1,41 @@
+{
+  "archetypes": [
+    {
+      "id": "melee_slime",
+      "type": "melee",
+      "hp": 25,
+      "damage": 4,
+      "speed": 45,
+      "floorMin": 1,
+      "floorMax": 25,
+      "attackRange": 22,
+      "attackCooldown": 1.2
+    },
+    {
+      "id": "ranged_goblin",
+      "type": "ranged",
+      "hp": 15,
+      "damage": 6,
+      "speed": 35,
+      "floorMin": 1,
+      "floorMax": 25,
+      "attackRange": 180,
+      "shootCooldown": 1.8,
+      "projectileSpeed": 220
+    },
+    {
+      "id": "bomb_slime",
+      "type": "melee",
+      "hp": 20,
+      "damage": 5,
+      "speed": 40,
+      "floorMin": 3,
+      "floorMax": 25,
+      "attackRange": 24,
+      "attackCooldown": 1.0,
+      "bombOnDeath": true,
+      "bombRadius": 50,
+      "bombDamage": 12
+    }
+  ]
+}

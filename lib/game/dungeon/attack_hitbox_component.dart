@@ -3,6 +3,7 @@ import 'package:flame/components.dart';
 import 'package:flame/game.dart';
 
 import 'package:roguelike_dungeon/game/entities/damageable.dart';
+import 'package:roguelike_dungeon/game/entities/player_component.dart';
 
 /// Short-lived hitbox that damages [Damageable] components on collision.
 /// Spawn in front of player on attack; removed after first hit or timeout.
@@ -43,6 +44,7 @@ class AttackHitboxComponent extends PositionComponent
   @override
   void onCollision(Set<Vector2> intersectionPoints, PositionComponent other) {
     super.onCollision(intersectionPoints, other);
+    if (other is PlayerComponent) return;
     if (other is! Damageable) return;
     final d = other as Damageable;
     if (d.isAlive) {
