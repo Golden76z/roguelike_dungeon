@@ -77,6 +77,7 @@ Use this section as the reference for *what* to build. Do not contradict these i
 - **Weapon types**: **Swords, axes, bows, guns** (all in config; extendable).
 - **Loot philosophy**: **Small drops of coins** during the room; **each end-of-room** gives a **better loot** (consumable, weapon upgrade, or similar).
 - **Lucky room chests**: **Usually strong rewards** — e.g. +1 HP, strong gun perks, base stat improvements **for the run** (run-bound bonuses).
+- **Reward choice screen**: When **opening a chest** (lucky room) or **defeating a boss**, do **not** give random loot. Instead show a **screen with 3 cards**; the player **chooses 1 of 3** items from a list (e.g. 3 options drawn from the appropriate reward pool). Same UX for both chest and boss.
 
 ### Technical & architecture
 
@@ -147,13 +148,13 @@ Use this section as the reference for *what* to build. Do not contradict these i
 
 ## Chapter 4 – Dungeon room system & map overlay
 
-- [ ] **Room data model**: each room has **type** (exit doors: top/bottom/left/right), **dimensions** (variable width/height), **difficulty tier**, **floor range**, **tags** (e.g. combat, lucky, boss, stair_up); all from **JSON/YAML**
-- [ ] **Room presets**: loader reads room definitions from config; each preset can specify tilemap or template ID and dimensions
-- [ ] **Floor generator**: per floor, build a **maze-like graph** that **forms a square** (or near-square); **number of rooms increases with floor level**; place **one “stair up” room**; **lucky room rules**: max 2 per floor, at least 1 if previous floor had none; **boss room** every 5 floors
-- [ ] **Next room by exit**: when player exits through a door (top/bottom/left/right), **next room is chosen at random** from presets that have a matching entrance; connectivity and pool defined in config
-- [ ] **Entering dungeon from hub**: play **short animation + zoom** when passing through dungeon door
-- [ ] **Map overlay**: **icon in top-right** (placeholder image; you provide asset later); tap toggles **overlay** that shows **current floor map** with **walls in white** only; tap again to hide; **overlay must not capture input** for movement/combat (input-transparent for game controls)
-- [ ] **Backtracking**: within floor, allow re-entering cleared rooms; when player enters “stair up”, load next floor and **disable going back** to previous floor
+- [x] **Room data model**: each room has **type** (exit doors: top/bottom/left/right), **dimensions** (variable width/height), **difficulty tier**, **floor range**, **tags** (e.g. combat, lucky, boss, stair_up); all from **JSON/YAML**
+- [x] **Room presets**: loader reads room definitions from config; each preset can specify tilemap or template ID and dimensions
+- [x] **Floor generator**: per floor, build a **maze-like graph** that **forms a square** (or near-square); **number of rooms increases with floor level**; place **one “stair up” room**; **lucky room rules**: max 2 per floor, at least 1 if previous floor had none; **boss room** every 5 floors
+- [x] **Next room by exit**: when player exits through a door (top/bottom/left/right), **next room is chosen at random** from presets that have a matching entrance; connectivity and pool defined in config
+- [x] **Entering dungeon from hub**: play **short animation + zoom** when passing through dungeon door
+- [x] **Map overlay**: **icon in top-right** (placeholder image; you provide asset later); tap toggles **overlay** that shows **current floor map** with **walls in white** only; tap again to hide; **overlay must not capture input** for movement/combat (input-transparent for game controls)
+- [x] **Backtracking**: within floor, allow re-entering cleared rooms; when player enters “stair up”, load next floor and **disable going back** to previous floor
 
 ---
 
@@ -194,7 +195,7 @@ Use this section as the reference for *what* to build. Do not contradict these i
 - [ ] **Lucky room type**: mark rooms as “lucky” in generator; enforce **max 2 per floor** and **at least 1 if previous had none**; apply **block for next 4 rooms** after encountering a lucky room (rule as you specified)
 - [ ] **Chest**: interactable chest in lucky room; requires **key** to open
 - [ ] **Keys**: **lucky room key** — buy in **hub shop**; **max stack 3**; consume one on open
-- [ ] **Chest rewards**: **strong run-bound rewards** (e.g. +1 HP, strong weapon perks, base stat improvements); table in **JSON/YAML**; extendable
+- [ ] **Chest rewards**: open a **reward choice screen** with **3 cards**; player **picks 1 of 3** from the chest reward pool (strong run-bound: +1 HP, weapon perks, etc.); pool in **JSON/YAML**, extendable
 - [ ] Ensure chest content and key type are config-driven so new rewards don’t need code changes
 
 ---
@@ -204,7 +205,7 @@ Use this section as the reference for *what* to build. Do not contradict these i
 - [ ] **Boss rooms**: generated **every 5 floors** (5, 10, 15, 20, 25); one boss room per such floor
 - [ ] **Boss archetypes**: at least **one distinct boss per milestone** (5 total for v1); each with **multi-phase** behavior (phases defined in config or code pattern)
 - [ ] **Arena**: boss room locks player in (arena lock-in); optional intro sequence
-- [ ] **Rewards**: on kill grant **rubys** (for Hunter Log) and any other rewards defined in config; update best-floor and save
+- [ ] **Rewards**: on kill grant **rubys** (for Hunter Log); then show **reward choice screen** with **3 cards**; player **picks 1 of 3** from the boss reward pool (run-bound items); update best-floor and save
 - [ ] **Boss list extendable**: new bosses added via config + art + behavior hook
 
 ---

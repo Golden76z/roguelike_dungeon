@@ -1,0 +1,59 @@
+{
+  "tileSize": 32,
+  "presets": [
+    {
+      "id": "combat_square",
+      "widthTiles": 12,
+      "heightTiles": 10,
+      "doors": ["top", "bottom", "left", "right"],
+      "tags": ["combat"],
+      "floorMin": 1,
+      "floorMax": 25
+    },
+    {
+      "id": "combat_h",
+      "widthTiles": 14,
+      "heightTiles": 8,
+      "doors": ["left", "right"],
+      "tags": ["combat"],
+      "floorMin": 1,
+      "floorMax": 25
+    },
+    {
+      "id": "combat_v",
+      "widthTiles": 8,
+      "heightTiles": 12,
+      "doors": ["top", "bottom"],
+      "tags": ["combat"],
+      "floorMin": 1,
+      "floorMax": 25
+    },
+    {
+      "id": "stair_up",
+      "widthTiles": 10,
+      "heightTiles": 8,
+      "doors": ["top", "bottom", "left", "right"],
+      "tags": ["stair_up"],
+      "floorMin": 1,
+      "floorMax": 25
+    },
+    {
+      "id": "boss_arena",
+      "widthTiles": 16,
+      "heightTiles": 14,
+      "doors": ["top"],
+      "tags": ["boss"],
+      "floorMin": 5,
+      "floorMax": 25
+    },
+    {
+      "id": "lucky",
+      "widthTiles": 10,
+      "heightTiles": 10,
+      "doors": ["top", "bottom", "left", "right"],
+      "tags": ["lucky"],
+      "floorMin": 1,
+      "floorMax": 25
+    }
+  ]
+}

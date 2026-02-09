@@ -2,6 +2,7 @@ import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 
 import 'package:roguelike_dungeon/game/roguelike_game.dart';
+import 'package:roguelike_dungeon/ui/dungeon/dungeon_screen.dart';
 import 'package:roguelike_dungeon/ui/widgets/virtual_joystick.dart';
 
 /// Hub world: single walkable map with shop, hunter log, character gallery,
@@ -31,7 +32,11 @@ class _HubScreenState extends State<HubScreen> {
   void _onInteract() {
     final id = _game.triggerInteract();
     if (id == null || !mounted) return;
-    // Stub: show dialog or navigate. Chapter 10/4 will open real UIs.
+    if (id == 'dungeon_door') {
+      _showEnterDungeonDialog();
+      return;
+    }
+    // Stub: shop, hunter log, etc. Chapter 10 will open real UIs.
     showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
@@ -43,6 +48,51 @@ class _HubScreenState extends State<HubScreen> {
             child: const Text('OK'),
           ),
         ],
+      ),
+    );
+  }
+
+  void _showEnterDungeonDialog() {
+    showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Enter dungeon'),
+        content: const Text(
+          'Venture into the dungeon? Progress will save as you clear rooms.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              _enterDungeonWithTransition();
+            },
+            child: const Text('Enter'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _enterDungeonWithTransition() {
+    Navigator.of(context).push(
+      PageRouteBuilder<void>(
+        opaque: false,
+        pageBuilder: (context, animation, secondaryAnimation) =>
+            const DungeonScreen(),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          return FadeTransition(
+            opacity: animation,
+            child: ScaleTransition(
+              scale: Tween<double>(begin: 0.95, end: 1).animate(animation),
+              child: child,
+            ),
+          );
+        },
+        transitionDuration: const Duration(milliseconds: 400),
       ),
     );
   }
