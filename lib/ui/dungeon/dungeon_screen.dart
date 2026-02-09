@@ -1,6 +1,7 @@
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 
+import 'package:roguelike_dungeon/data/chest_reward.dart';
 import 'package:roguelike_dungeon/game/dungeon/dungeon_game.dart';
 import 'package:roguelike_dungeon/ui/dungeon/map_overlay.dart';
 import 'package:roguelike_dungeon/ui/widgets/virtual_joystick.dart';
@@ -32,6 +33,7 @@ class _DungeonScreenState extends State<DungeonScreen> {
     _game.currentRoomNotifier.dispose();
     _game.playerHpNotifier.dispose();
     _game.playerMaxHpNotifier.dispose();
+    _game.chestRewardChoiceNotifier.dispose();
     super.dispose();
   }
 
@@ -93,6 +95,14 @@ class _DungeonScreenState extends State<DungeonScreen> {
                                       ),
                                     ),
                                     const SizedBox(height: 4),
+                                    Text(
+                                      'Keys: ${_game.luckyKeys}',
+                                      style: const TextStyle(
+                                        color: Colors.white70,
+                                        fontSize: 11,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
                                     ClipRRect(
                                       borderRadius: BorderRadius.circular(4),
                                       child: LinearProgressIndicator(
@@ -125,10 +135,15 @@ class _DungeonScreenState extends State<DungeonScreen> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       _ActionButton(
+                        label: 'Interact',
+                        onPressed: () => _game.tryInteract(),
+                      ),
+                      const SizedBox(width: 12),
+                      _ActionButton(
                         label: 'Dash',
                         onPressed: () => _game.dash(),
                       ),
-                      const SizedBox(width: 16),
+                      const SizedBox(width: 12),
                       _ActionButton(
                         label: 'Attack',
                         onPressed: () => _game.attack(),
@@ -163,8 +178,89 @@ class _DungeonScreenState extends State<DungeonScreen> {
                   builder: (context, value, child) => MapOverlay(game: _game),
                 ),
               ),
+            ValueListenableBuilder<List<ChestReward>?>(
+              valueListenable: _game.chestRewardChoiceNotifier,
+              builder: (context, rewards, _) {
+                if (rewards == null || rewards.isEmpty) return const SizedBox.shrink();
+                return Positioned.fill(
+                  child: _RewardChoiceOverlay(
+                    rewards: rewards,
+                    onPick: (reward) {
+                      _game.applyChestReward(reward);
+                      setState(() {});
+                    },
+                  ),
+                );
+              },
+            ),
           ],
         ],
+      ),
+    );
+  }
+}
+
+class _RewardChoiceOverlay extends StatelessWidget {
+  const _RewardChoiceOverlay({
+    required this.rewards,
+    required this.onPick,
+  });
+
+  final List<ChestReward> rewards;
+  final void Function(ChestReward) onPick;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.black54,
+      child: SafeArea(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text(
+              'Pick one reward',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 24),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: rewards.map((r) {
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  child: InkWell(
+                    onTap: () => onPick(r),
+                    child: Container(
+                      width: 100,
+                      padding: const EdgeInsets.symmetric(vertical: 20),
+                      decoration: BoxDecoration(
+                        color: Colors.white12,
+                        border: Border.all(color: Colors.white38),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            r.label,
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
+          ],
+        ),
       ),
     );
   }

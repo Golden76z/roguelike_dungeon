@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/services.dart';
 
+import 'package:roguelike_dungeon/data/chest_reward.dart';
 import 'package:roguelike_dungeon/data/enemy_archetype.dart';
 import 'package:roguelike_dungeon/data/game_config.dart';
 import 'package:roguelike_dungeon/data/room_definition.dart';
@@ -14,10 +15,12 @@ class ConfigLoader {
   static const String _gameConfigPath = 'assets/data/game_config.json';
   static const String _roomPresetsPath = 'assets/data/room_presets.json';
   static const String _enemyArchetypesPath = 'assets/data/enemy_archetypes.json';
+  static const String _chestRewardsPath = 'assets/data/chest_rewards.json';
 
   GameConfig? _gameConfig;
   List<RoomDefinition>? _roomPresets;
   List<EnemyArchetype>? _enemyArchetypes;
+  List<ChestReward>? _chestRewards;
 
   /// Cached game config; call [loadGameConfig] first (e.g. at app start or before hub).
   GameConfig get gameConfig {
@@ -77,10 +80,31 @@ class ConfigLoader {
     return _enemyArchetypes!;
   }
 
+  /// Cached chest reward pool; call [loadChestRewards] before opening chests.
+  List<ChestReward> get chestRewards {
+    final r = _chestRewards;
+    if (r == null) {
+      throw StateError(
+          'Chest rewards not loaded. Call loadChestRewards() first.');
+    }
+    return r;
+  }
+
   /// Archetypes valid for the given floor (floorMin <= floor <= floorMax).
   List<EnemyArchetype> archetypesForFloor(int floor) {
     return enemyArchetypes
         .where((a) => floor >= a.floorMin && floor <= a.floorMax)
         .toList();
+  }
+
+  /// Loads chest reward pool from assets/data/chest_rewards.json.
+  Future<List<ChestReward>> loadChestRewards() async {
+    final raw = await rootBundle.loadString(_chestRewardsPath);
+    final map = jsonDecode(raw) as Map<String, dynamic>;
+    final list = map['rewards'] as List<dynamic>? ?? [];
+    _chestRewards = list
+        .map((e) => ChestReward.fromJson(e as Map<String, dynamic>))
+        .toList();
+    return _chestRewards!;
   }
 }

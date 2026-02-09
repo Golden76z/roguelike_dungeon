@@ -1,0 +1,12 @@
+{
+  "rewards": [
+    { "id": "hp_1", "type": "max_hp", "label": "+1 Max HP", "value": 1 },
+    { "id": "hp_2", "type": "max_hp", "label": "+2 Max HP", "value": 2 },
+    { "id": "heal_20", "type": "heal", "label": "Heal 20", "value": 20 },
+    { "id": "heal_50", "type": "heal", "label": "Heal 50", "value": 50 },
+    { "id": "damage_2", "type": "damage", "label": "+2 Damage", "value": 2 },
+    { "id": "damage_5", "type": "damage", "label": "+5 Damage", "value": 5 },
+    { "id": "speed_01", "type": "speed", "label": "+10% Speed", "value": 0.1 },
+    { "id": "armor_1", "type": "armor", "label": "+1 Armor", "value": 1 }
+  ]
+}

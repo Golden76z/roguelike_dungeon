@@ -16,6 +16,7 @@ When you add sprites later, replace the `render()` implementation in each compon
 | **Enemy projectile** | Square | Orange  | Hurts player only (no friendly fire) |
 | **Room floor**  | Rect tiles | Dark blue-grey | Per tile |
 | **Walls**       | Rect tiles | Grey (from WallComponent) | Collision |
+| **Chest** (lucky room) | Square | Brown (closed) / dark brown (opened) | Interact with key for 3-card reward |
 
 Bomb-on-death: no visible indicator yet; damage is applied in a radius when the enemy dies.
 

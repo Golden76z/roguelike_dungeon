@@ -4,8 +4,10 @@ import 'package:flame/collisions.dart';
 import 'package:flame/game.dart';
 import 'package:flutter/foundation.dart';
 
+import 'package:roguelike_dungeon/data/chest_reward.dart';
 import 'package:roguelike_dungeon/data/floor_node.dart';
 import 'package:roguelike_dungeon/game/dungeon/attack_hitbox_component.dart';
+import 'package:roguelike_dungeon/game/dungeon/chest_component.dart';
 import 'package:roguelike_dungeon/game/dungeon/dungeon_room_component.dart';
 import 'package:roguelike_dungeon/game/dungeon/enemy_projectile_component.dart';
 import 'package:roguelike_dungeon/game/dungeon/explosion_damage_component.dart';
@@ -30,6 +32,16 @@ class DungeonGame extends FlameGame
   int _waveCountForRoom = 1;
   bool _currentRoomIsCombatOrBoss = false;
   double _waveSpawnCooldown = 0;
+  int _roomsSinceLucky = 4;
+  bool _currentRoomHadChest = false;
+  int _luckyKeys = 1;
+
+  /// Lucky room keys (max 3). Consumed when opening chest.
+  int get luckyKeys => _luckyKeys;
+
+  /// Notifier: when non-null, UI should show 3-card reward choice with these options.
+  final ValueNotifier<List<ChestReward>?> chestRewardChoiceNotifier =
+      ValueNotifier<List<ChestReward>?>(null);
 
   /// For map overlay: current floor's room graph.
   List<FloorNode> get floorNodes => _floorNodes;
@@ -77,12 +89,58 @@ class DungeonGame extends FlameGame
     _player.performDash();
   }
 
+  /// Called from overlay (Interact). Returns true if chest was opened (UI shows reward choice).
+  bool tryInteract() {
+    final chests = world.children.whereType<ChestComponent>().toList();
+    if (chests.isEmpty) return false;
+    final chest = chests.first;
+    if (chest.isOpened) return false;
+    final dist = (chest.position - _player.position).length;
+    if (dist > 60) return false;
+    if (_luckyKeys <= 0) return false;
+    _luckyKeys--;
+    chest.markOpened();
+    final pool = Services.configLoader.chestRewards;
+    final chosen = <ChestReward>[];
+    final indices = List.generate(pool.length, (i) => i)..shuffle(_random);
+    for (var i = 0; i < 3 && i < indices.length; i++) {
+      chosen.add(pool[indices[i]]);
+    }
+    if (chosen.isNotEmpty) chestRewardChoiceNotifier.value = chosen;
+    return true;
+  }
+
+  /// Apply chosen chest reward to player. Call after user picks one of the 3 cards.
+  void applyChestReward(ChestReward reward) {
+    switch (reward.type) {
+      case 'max_hp':
+        _player.stats.runMaxHpBonus += reward.value;
+        _player.stats.heal(reward.value);
+        break;
+      case 'heal':
+        _player.stats.heal(reward.value);
+        break;
+      case 'damage':
+        _player.stats.baseDamage += reward.value;
+        break;
+      case 'speed':
+        _player.stats.baseSpeed += reward.value;
+        break;
+      case 'armor':
+        _player.stats.armor += reward.value;
+        break;
+      default:
+        _player.stats.heal(reward.value);
+    }
+    chestRewardChoiceNotifier.value = null;
+  }
+
   @override
   void update(double dt) {
     super.update(dt);
     _player.tickCooldowns(dt);
     playerHpNotifier.value = _player.stats.hp;
-    playerMaxHpNotifier.value = _player.stats.maxHp;
+    playerMaxHpNotifier.value = _player.stats.effectiveMaxHp;
 
     if (_currentRoomIsCombatOrBoss && _waveSpawnCooldown <= 0) {
       final enemyCount = world.children.whereType<EnemyComponent>().length;
@@ -100,6 +158,7 @@ class DungeonGame extends FlameGame
   /// Called when player hits a door zone. Transition to connected room or next floor.
   void onDoorTriggered(String direction) {
     final node = _floorNodes[_currentRoomIndex];
+    if (_currentRoomHadChest) _roomsSinceLucky = 0;
     final nextIndex = node.neighbors[direction];
     if (nextIndex != null && nextIndex >= 0 && nextIndex < _floorNodes.length) {
       _loadRoom(nextIndex);
@@ -114,8 +173,10 @@ class DungeonGame extends FlameGame
   Future<void> startDungeon() async {
     await Services.configLoader.loadRoomPresets();
     await Services.configLoader.loadEnemyArchetypes();
+    await Services.configLoader.loadChestRewards();
     _currentFloor = 1;
     _previousFloorHadLucky = false;
+    _roomsSinceLucky = 4;
     _floorNodes = FloorGenerator(_random).generate(_currentFloor,
         previousFloorHadLucky: _previousFloorHadLucky);
     _currentRoomIndex = 0;
@@ -133,6 +194,7 @@ class DungeonGame extends FlameGame
     world.removeAll(world.children.whereType<EnemyComponent>());
     world.removeAll(world.children.whereType<EnemyProjectileComponent>());
     world.removeAll(world.children.whereType<ExplosionDamageComponent>());
+    world.removeAll(world.children.whereType<ChestComponent>());
 
     final room = DungeonRoomComponent(node: node);
     world.add(room);
@@ -151,6 +213,18 @@ class DungeonGame extends FlameGame
         ? 1
         : config.waveCountForFloor(_currentFloor);
     _waveSpawnCooldown = 0;
+
+    final isLuckyRoom = node.isLucky && _roomsSinceLucky >= 4;
+    if (isLuckyRoom) {
+      _currentRoomHadChest = true;
+      final cx = (node.definition.widthTiles * ts) / 2;
+      final cy = (node.definition.heightTiles * ts) / 2;
+      world.add(ChestComponent(position: Vector2(cx, cy)));
+    } else {
+      _currentRoomHadChest = false;
+    }
+    _roomsSinceLucky++;
+
     if (_currentRoomIsCombatOrBoss) {
       _spawnEnemiesInRoom(node, ts, 1);
     }
@@ -199,6 +273,7 @@ class DungeonGame extends FlameGame
     final config = Services.configLoader.gameConfig;
     if (_currentFloor >= config.maxFloors) return; // Win / end run.
     _currentFloor++;
+    _roomsSinceLucky = 4;
     final hadLucky =
         _floorNodes.any((n) => n.isLucky);
     _previousFloorHadLucky = hadLucky;

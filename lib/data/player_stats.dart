@@ -11,6 +11,9 @@ class PlayerStats {
 
   double hp;
   final double maxHp;
+  /// Run-time bonus (e.g. from chest/boss rewards). Effective max = maxHp + runMaxHpBonus.
+  double runMaxHpBonus = 0;
+  double get effectiveMaxHp => maxHp + runMaxHpBonus;
   double baseDamage;
   double baseSpeed;
   double armor;
@@ -27,7 +30,7 @@ class PlayerStats {
     final crit = canCrit && _rollCrit();
     final raw = crit ? amount * critMultiplier : amount;
     final reduced = (raw - armor).clamp(0.0, double.infinity).toDouble();
-    hp = (hp - reduced).clamp(0.0, maxHp);
+    hp = (hp - reduced).clamp(0.0, effectiveMaxHp);
     return reduced;
   }
 
@@ -36,7 +39,7 @@ class PlayerStats {
   }
 
   void heal(double amount) {
-    hp = (hp + amount).clamp(0.0, maxHp);
+    hp = (hp + amount).clamp(0.0, effectiveMaxHp);
   }
 
   static final _random = _Random();

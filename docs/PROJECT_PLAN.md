@@ -192,11 +192,11 @@ Use this section as the reference for *what* to build. Do not contradict these i
 
 ## Chapter 8 – Lucky rooms, chests & keys
 
-- [ ] **Lucky room type**: mark rooms as “lucky” in generator; enforce **max 2 per floor** and **at least 1 if previous had none**; apply **block for next 4 rooms** after encountering a lucky room (rule as you specified)
-- [ ] **Chest**: interactable chest in lucky room; requires **key** to open
-- [ ] **Keys**: **lucky room key** — buy in **hub shop**; **max stack 3**; consume one on open
-- [ ] **Chest rewards**: open a **reward choice screen** with **3 cards**; player **picks 1 of 3** from the chest reward pool (strong run-bound: +1 HP, weapon perks, etc.); pool in **JSON/YAML**, extendable
-- [ ] Ensure chest content and key type are config-driven so new rewards don’t need code changes
+- [x] **Lucky room type**: generator marks rooms as “lucky” (max 2 per floor, at least 1 if previous had none); **block for next 4 rooms** after visiting a lucky room (no chest in next 4 room visits)
+- [x] **Chest**: interactable chest in valid lucky room; requires **key** to open; placeholder square
+- [x] **Keys**: **lucky room key** — run state (max 3); start with 1 for testing; consume one on open (hub shop to buy in Ch11)
+- [x] **Chest rewards**: **reward choice screen** with **3 cards**; player **picks 1 of 3** from `chest_rewards.json` (max_hp, heal, damage, speed, armor); pool extendable
+- [x] Chest rewards and types are config-driven; new entries in JSON only
 
 ---
 
