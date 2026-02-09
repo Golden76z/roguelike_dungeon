@@ -1,5 +1,13 @@
 {
   "tileSize": 32,
   "maxFloors": 25,
-  "bossEveryFloors": 5
+  "bossEveryFloors": 5,
+  "roomCountBase": 4,
+  "roomCountPer5Floors": 1,
+  "roomCountMax": 16,
+  "waveCountBase": 1,
+  "waveCountPer5Floors": 1,
+  "waveCountMax": 4,
+  "hpScalePerFloor": 0.05,
+  "damageScalePerFloor": 0.03
 }

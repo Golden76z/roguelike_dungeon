@@ -1,4 +1,4 @@
-import 'dart:ui' show Canvas, Color, Offset, Paint;
+import 'dart:ui' show Canvas, Color, Paint, Rect;
 
 import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
@@ -18,7 +18,10 @@ class EnemyComponent extends PositionComponent
   EnemyComponent({
     required Vector2 position,
     required this.archetype,
-  })  : _hp = archetype.hp,
+    this.hpScale = 1.0,
+    this.damageScale = 1.0,
+  })  : _maxHp = archetype.hp * (hpScale),
+        _hp = archetype.hp * (hpScale),
         super(
           position: position,
           size: Vector2.all(
@@ -27,9 +30,14 @@ class EnemyComponent extends PositionComponent
         );
 
   final EnemyArchetype archetype;
+  final double hpScale;
+  final double damageScale;
+  final double _maxHp;
   double _hp;
   double _attackCooldown = 0;
   double _shootCooldown = 0;
+
+  double get effectiveDamage => archetype.damage * damageScale;
 
   @override
   bool get isAlive => _hp > 0;
@@ -37,7 +45,7 @@ class EnemyComponent extends PositionComponent
   @override
   void takeDamage(double amount) {
     if (amount <= 0) return;
-    _hp = (_hp - amount).clamp(0.0, archetype.hp);
+    _hp = (_hp - amount).clamp(0.0, _maxHp);
   }
 
   @override
@@ -79,7 +87,7 @@ class EnemyComponent extends PositionComponent
       }
     } else {
       if (dist <= archetype.attackRange && _attackCooldown <= 0) {
-        game.damagePlayer(archetype.damage);
+        game.damagePlayer(effectiveDamage);
         _attackCooldown = archetype.attackCooldown;
       }
       if (dist > archetype.attackRange) {
@@ -95,7 +103,7 @@ class EnemyComponent extends PositionComponent
       position: position.clone(),
       direction: dir,
       speed: archetype.projectileSpeed,
-      damage: archetype.damage,
+      damage: effectiveDamage,
     ));
   }
 
@@ -104,7 +112,7 @@ class EnemyComponent extends PositionComponent
       game.world.add(ExplosionDamageComponent(
         position: position.clone(),
         radius: archetype.bombRadius,
-        damage: archetype.bombDamage,
+        damage: archetype.bombDamage * damageScale,
       ));
     }
     removeFromParent();
@@ -141,9 +149,8 @@ class EnemyComponent extends PositionComponent
     final color = archetype.isRanged
         ? const Color(0xFFE57373)
         : const Color(0xFFD32F2F);
-    canvas.drawCircle(
-      Offset(size.x / 2, size.y / 2),
-      size.x / 2,
+    canvas.drawRect(
+      Rect.fromLTWH(0, 0, size.x, size.y),
       Paint()..color = color,
     );
   }

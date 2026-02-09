@@ -1,4 +1,4 @@
-import 'dart:ui' show Canvas, Color, Offset, Paint;
+import 'dart:ui' show Canvas, Color, Paint, Rect;
 
 import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
@@ -55,9 +55,8 @@ class EnemyProjectileComponent extends PositionComponent
   @override
   void render(Canvas canvas) {
     super.render(canvas);
-    canvas.drawCircle(
-      Offset(size.x / 2, size.y / 2),
-      size.x / 2,
+    canvas.drawRect(
+      Rect.fromLTWH(0, 0, size.x, size.y),
       Paint()..color = const Color(0xFFFF9800),
     );
   }

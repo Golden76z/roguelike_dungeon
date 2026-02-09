@@ -10,18 +10,16 @@ class FloorGenerator {
 
   final Random _random;
 
-  /// Number of rooms for a given floor (increases with floor level).
+  /// Number of rooms for a given floor (from config).
   static int roomCountForFloor(int floor) {
-    final base = 4;
-    final extra = (floor / 5).floor();
-    return (base + extra).clamp(4, 16);
+    return Services.configLoader.gameConfig.roomCountForFloor(floor);
   }
 
   /// Generate floor graph. [previousFloorHadLucky] for "at least one lucky if previous had none".
   List<FloorNode> generate(int floor, {bool previousFloorHadLucky = false}) {
     final config = Services.configLoader.gameConfig;
     final presets = Services.configLoader.roomPresets;
-    final count = roomCountForFloor(floor);
+    final count = config.roomCountForFloor(floor);
     final isBossFloor = floor > 0 && floor % config.bossEveryFloors == 0;
 
     // Build grid dimensions (near-square): e.g. 4 -> 2x2, 6 -> 2x3, 9 -> 3x3.

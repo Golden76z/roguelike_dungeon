@@ -26,6 +26,10 @@ class DungeonGame extends FlameGame
   int _currentRoomIndex = 0;
   int _currentFloor = 1;
   bool _previousFloorHadLucky = false;
+  int _currentWaveForRoom = 1;
+  int _waveCountForRoom = 1;
+  bool _currentRoomIsCombatOrBoss = false;
+  double _waveSpawnCooldown = 0;
 
   /// For map overlay: current floor's room graph.
   List<FloorNode> get floorNodes => _floorNodes;
@@ -79,6 +83,18 @@ class DungeonGame extends FlameGame
     _player.tickCooldowns(dt);
     playerHpNotifier.value = _player.stats.hp;
     playerMaxHpNotifier.value = _player.stats.maxHp;
+
+    if (_currentRoomIsCombatOrBoss && _waveSpawnCooldown <= 0) {
+      final enemyCount = world.children.whereType<EnemyComponent>().length;
+      if (enemyCount == 0 && _currentWaveForRoom < _waveCountForRoom) {
+        _currentWaveForRoom++;
+        final node = _floorNodes[_currentRoomIndex];
+        final ts = Services.configLoader.gameConfig.tileSize.toDouble();
+        _spawnEnemiesInRoom(node, ts, _currentWaveForRoom);
+        _waveSpawnCooldown = 0.5;
+      }
+    }
+    if (_waveSpawnCooldown > 0) _waveSpawnCooldown -= dt;
   }
 
   /// Called when player hits a door zone. Transition to connected room or next floor.
@@ -128,16 +144,26 @@ class DungeonGame extends FlameGame
     _player = PlayerComponent(position: Vector2(px, py));
     world.add(_player);
 
-    _spawnEnemiesInRoom(node, ts);
+    final tags = node.definition.tags;
+    _currentRoomIsCombatOrBoss = tags.contains('combat') || tags.contains('boss');
+    _currentWaveForRoom = 1;
+    _waveCountForRoom = tags.contains('boss')
+        ? 1
+        : config.waveCountForFloor(_currentFloor);
+    _waveSpawnCooldown = 0;
+    if (_currentRoomIsCombatOrBoss) {
+      _spawnEnemiesInRoom(node, ts, 1);
+    }
     camera.follow(_player, snap: true);
   }
 
-  void _spawnEnemiesInRoom(FloorNode node, double tileSize) {
+  void _spawnEnemiesInRoom(FloorNode node, double tileSize, int wave) {
     final tags = node.definition.tags;
     final isCombat = tags.contains('combat');
     final isBoss = tags.contains('boss');
     if (!isCombat && !isBoss) return;
 
+    final config = Services.configLoader.gameConfig;
     final archetypes = Services.configLoader.archetypesForFloor(_currentFloor);
     if (archetypes.isEmpty) return;
 
@@ -150,9 +176,12 @@ class DungeonGame extends FlameGame
     final maxY = roomH - margin * tileSize;
     if (maxX <= minX || maxY <= minY) return;
 
+    final hpScale = config.hpScaleForFloor(_currentFloor);
+    final damageScale = config.damageScaleForFloor(_currentFloor);
+
     final count = isBoss
         ? 1
-        : (1 + _currentFloor + _random.nextInt(2)).clamp(1, 8);
+        : (wave + _currentFloor + _random.nextInt(2)).clamp(1, 10);
     for (var i = 0; i < count; i++) {
       final archetype = archetypes[_random.nextInt(archetypes.length)];
       final x = minX + _random.nextDouble() * (maxX - minX);
@@ -160,6 +189,8 @@ class DungeonGame extends FlameGame
       world.add(EnemyComponent(
         position: Vector2(x, y),
         archetype: archetype,
+        hpScale: hpScale,
+        damageScale: damageScale,
       ));
     }
   }

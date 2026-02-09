@@ -1,4 +1,4 @@
-import 'dart:ui' show Canvas, Color, Offset, Paint;
+import 'dart:ui' show Canvas, Color, Paint, Rect;
 
 import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
@@ -112,10 +112,9 @@ class PlayerComponent extends PositionComponent
   @override
   void render(Canvas canvas) {
     super.render(canvas);
-    // Placeholder: filled circle (replace with sprite later).
-    canvas.drawCircle(
-      Offset(size.x / 2, size.y / 2),
-      size.x / 2,
+    // Placeholder: green square (replace with sprite when art is ready).
+    canvas.drawRect(
+      Rect.fromLTWH(0, 0, size.x, size.y),
       Paint()..color = const Color(0xFF4CAF50),
     );
   }

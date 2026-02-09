@@ -39,7 +39,9 @@ Your personal checklist, grouped by **phase/priority**. For each phase, the list
    - Short description + rough stats for the 1 melee and 1 ranged enemy.
    - One or two weapon archetypes (e.g. sword, gun) for tuning.
 
-Once these exist, we can wire them in and you have a playable prototype.
+**Placeholder shapes:** The game is testable **without any art**. All characters and projectiles use basic **squares** (see `docs/PLACEHOLDER_VISUALS.md`). You can play through hub and dungeon and verify mechanics before adding sprites.
+
+Once the assets above exist, we can wire them in and you have a polished playable prototype.
 
 ---
 

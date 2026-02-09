@@ -182,11 +182,11 @@ Use this section as the reference for *what* to build. Do not contradict these i
 
 ## Chapter 7 – Floors, difficulty & waves
 
-- [ ] **Floor progression**: floors **1–25**; difficulty (enemy count, HP, damage, wave count) **increases with floor**; all driven by **JSON/YAML**
-- [ ] **Rooms per floor**: **increasing count per floor**; exact formula or table in config
-- [ ] **Wave-based rooms**: on higher floors, rooms can have **multiple waves**; wave count and composition from **floor level**; implement wave completion and “next wave” spawns
-- [ ] **Stair-up room**: one room per floor leads to next floor; entering it **locks** previous floor (no return)
-- [ ] **Per-floor enemy and room pools**: each floor (or floor band) references **enemy pools** and **room preset pools** in config; generator picks from pools only
+- [x] **Floor progression**: floors **1–25**; difficulty (enemy HP/damage scale, wave count) **increases with floor**; all driven by **game_config.json**
+- [x] **Rooms per floor**: **increasing count per floor** from config (`roomCountBase`, `roomCountPer5Floors`, `roomCountMax`)
+- [x] **Wave-based rooms**: combat rooms have **multiple waves**; wave count from config per floor; when all enemies dead, next wave spawns until wave count reached
+- [x] **Stair-up room**: one room per floor leads to next floor; entering it **locks** previous floor (no return)
+- [x] **Per-floor enemy and room pools**: generator uses **room presets** (floorMin/floorMax) and **archetypesForFloor**; config has HP/damage scale per floor
 
 ---
 
