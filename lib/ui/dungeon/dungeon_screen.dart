@@ -34,6 +34,7 @@ class _DungeonScreenState extends State<DungeonScreen> {
     _game.playerHpNotifier.dispose();
     _game.playerMaxHpNotifier.dispose();
     _game.chestRewardChoiceNotifier.dispose();
+    _game.bossRewardChoiceNotifier.dispose();
     super.dispose();
   }
 
@@ -184,9 +185,26 @@ class _DungeonScreenState extends State<DungeonScreen> {
                 if (rewards == null || rewards.isEmpty) return const SizedBox.shrink();
                 return Positioned.fill(
                   child: _RewardChoiceOverlay(
+                    title: 'Pick one reward',
                     rewards: rewards,
                     onPick: (reward) {
                       _game.applyChestReward(reward);
+                      setState(() {});
+                    },
+                  ),
+                );
+              },
+            ),
+            ValueListenableBuilder<List<ChestReward>?>(
+              valueListenable: _game.bossRewardChoiceNotifier,
+              builder: (context, rewards, _) {
+                if (rewards == null || rewards.isEmpty) return const SizedBox.shrink();
+                return Positioned.fill(
+                  child: _RewardChoiceOverlay(
+                    title: 'Boss defeated! Pick one reward',
+                    rewards: rewards,
+                    onPick: (reward) {
+                      _game.applyBossReward(reward);
                       setState(() {});
                     },
                   ),
@@ -202,10 +220,12 @@ class _DungeonScreenState extends State<DungeonScreen> {
 
 class _RewardChoiceOverlay extends StatelessWidget {
   const _RewardChoiceOverlay({
+    required this.title,
     required this.rewards,
     required this.onPick,
   });
 
+  final String title;
   final List<ChestReward> rewards;
   final void Function(ChestReward) onPick;
 
@@ -217,8 +237,8 @@ class _RewardChoiceOverlay extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Text(
-              'Pick one reward',
+            Text(
+              title,
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 20,

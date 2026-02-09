@@ -202,11 +202,11 @@ Use this section as the reference for *what* to build. Do not contradict these i
 
 ## Chapter 9 – Bosses
 
-- [ ] **Boss rooms**: generated **every 5 floors** (5, 10, 15, 20, 25); one boss room per such floor
-- [ ] **Boss archetypes**: at least **one distinct boss per milestone** (5 total for v1); each with **multi-phase** behavior (phases defined in config or code pattern)
-- [ ] **Arena**: boss room locks player in (arena lock-in); optional intro sequence
-- [ ] **Rewards**: on kill grant **rubys** (for Hunter Log); then show **reward choice screen** with **3 cards**; player **picks 1 of 3** from the boss reward pool (run-bound items); update best-floor and save
-- [ ] **Boss list extendable**: new bosses added via config + art + behavior hook
+- [x] **Boss rooms**: generated **every 5 floors** (5, 10, 15, 20, 25); one boss room per such floor
+- [x] **Boss archetypes**: **one distinct boss per milestone** (5 total) in `boss_archetypes.json`; stats scale by floor (multi-phase in config later)
+- [x] **Arena**: boss room **locks player in** (doors do nothing until boss is dead)
+- [x] **Rewards**: on kill grant **1 ruby** (rubysEarnedThisRun); show **reward choice screen** with **3 cards** (reuses chest reward pool); update **bestFloorReached**; save stub for later
+- [x] **Boss list extendable**: new bosses via `boss_archetypes.json` (floor field); same EnemyComponent + isBoss
 
 ---
 

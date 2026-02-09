@@ -20,18 +20,20 @@ class EnemyComponent extends PositionComponent
     required this.archetype,
     this.hpScale = 1.0,
     this.damageScale = 1.0,
+    this.isBoss = false,
   })  : _maxHp = archetype.hp * (hpScale),
         _hp = archetype.hp * (hpScale),
         super(
           position: position,
           size: Vector2.all(
-              Services.configLoader.gameConfig.tileSize * 0.7),
+              Services.configLoader.gameConfig.tileSize * (isBoss ? 1.2 : 0.7)),
           anchor: Anchor.center,
         );
 
   final EnemyArchetype archetype;
   final double hpScale;
   final double damageScale;
+  final bool isBoss;
   final double _maxHp;
   double _hp;
   double _attackCooldown = 0;
@@ -108,6 +110,9 @@ class EnemyComponent extends PositionComponent
   }
 
   void _onDeath() {
+    if (isBoss) {
+      game.onBossKilled();
+    }
     if (archetype.bombOnDeath) {
       game.world.add(ExplosionDamageComponent(
         position: position.clone(),
@@ -146,9 +151,11 @@ class EnemyComponent extends PositionComponent
   @override
   void render(Canvas canvas) {
     super.render(canvas);
-    final color = archetype.isRanged
-        ? const Color(0xFFE57373)
-        : const Color(0xFFD32F2F);
+    final color = isBoss
+        ? const Color(0xFF7B1FA2)
+        : archetype.isRanged
+            ? const Color(0xFFE57373)
+            : const Color(0xFFD32F2F);
     canvas.drawRect(
       Rect.fromLTWH(0, 0, size.x, size.y),
       Paint()..color = color,

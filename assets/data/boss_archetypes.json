@@ -1,0 +1,9 @@
+{
+  "bosses": [
+    { "id": "boss_5", "floor": 5, "hp": 80, "damage": 8, "speed": 45, "attackRange": 28 },
+    { "id": "boss_10", "floor": 10, "hp": 150, "damage": 12, "speed": 48, "attackRange": 30 },
+    { "id": "boss_15", "floor": 15, "hp": 220, "damage": 16, "speed": 50, "attackRange": 32 },
+    { "id": "boss_20", "floor": 20, "hp": 320, "damage": 20, "speed": 52, "attackRange": 34 },
+    { "id": "boss_25", "floor": 25, "hp": 450, "damage": 24, "speed": 55, "attackRange": 36 }
+  ]
+}

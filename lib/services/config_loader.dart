@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/services.dart';
 
+import 'package:roguelike_dungeon/data/boss_archetype.dart';
 import 'package:roguelike_dungeon/data/chest_reward.dart';
 import 'package:roguelike_dungeon/data/enemy_archetype.dart';
 import 'package:roguelike_dungeon/data/game_config.dart';
@@ -16,11 +17,13 @@ class ConfigLoader {
   static const String _roomPresetsPath = 'assets/data/room_presets.json';
   static const String _enemyArchetypesPath = 'assets/data/enemy_archetypes.json';
   static const String _chestRewardsPath = 'assets/data/chest_rewards.json';
+  static const String _bossArchetypesPath = 'assets/data/boss_archetypes.json';
 
   GameConfig? _gameConfig;
   List<RoomDefinition>? _roomPresets;
   List<EnemyArchetype>? _enemyArchetypes;
   List<ChestReward>? _chestRewards;
+  List<BossArchetype>? _bossArchetypes;
 
   /// Cached game config; call [loadGameConfig] first (e.g. at app start or before hub).
   GameConfig get gameConfig {
@@ -106,5 +109,33 @@ class ConfigLoader {
         .map((e) => ChestReward.fromJson(e as Map<String, dynamic>))
         .toList();
     return _chestRewards!;
+  }
+
+  /// Cached boss archetypes; call [loadBossArchetypes] before spawning boss rooms.
+  List<BossArchetype> get bossArchetypes {
+    final b = _bossArchetypes;
+    if (b == null) {
+      throw StateError(
+          'Boss archetypes not loaded. Call loadBossArchetypes() first.');
+    }
+    return b;
+  }
+
+  /// Loads boss archetypes from assets/data/boss_archetypes.json.
+  Future<List<BossArchetype>> loadBossArchetypes() async {
+    final raw = await rootBundle.loadString(_bossArchetypesPath);
+    final map = jsonDecode(raw) as Map<String, dynamic>;
+    final list = map['bosses'] as List<dynamic>? ?? [];
+    _bossArchetypes = list
+        .map((e) => BossArchetype.fromJson(e as Map<String, dynamic>))
+        .toList();
+    return _bossArchetypes!;
+  }
+
+  /// Boss for milestone floor (5, 10, 15, 20, 25). Falls back to first boss if none match.
+  BossArchetype? getBossForFloor(int floor) {
+    final match = bossArchetypes.where((b) => b.floor == floor).toList();
+    if (match.isNotEmpty) return match.first;
+    return bossArchetypes.isNotEmpty ? bossArchetypes.first : null;
   }
 }

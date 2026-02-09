@@ -17,6 +17,7 @@ When you add sprites later, replace the `render()` implementation in each compon
 | **Room floor**  | Rect tiles | Dark blue-grey | Per tile |
 | **Walls**       | Rect tiles | Grey (from WallComponent) | Collision |
 | **Chest** (lucky room) | Square | Brown (closed) / dark brown (opened) | Interact with key for 3-card reward |
+| **Boss** (boss room)   | Square | Purple (larger)                     | One per boss room; doors locked until dead |
 
 Bomb-on-death: no visible indicator yet; damage is applied in a radius when the enemy dies.
 

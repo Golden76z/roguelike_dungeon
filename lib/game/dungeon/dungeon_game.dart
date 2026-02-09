@@ -43,6 +43,18 @@ class DungeonGame extends FlameGame
   final ValueNotifier<List<ChestReward>?> chestRewardChoiceNotifier =
       ValueNotifier<List<ChestReward>?>(null);
 
+  /// Notifier: when non-null, UI should show 3-card boss reward choice.
+  final ValueNotifier<List<ChestReward>?> bossRewardChoiceNotifier =
+      ValueNotifier<List<ChestReward>?>(null);
+
+  /// Rubys earned this run (from bosses). For Hunter Log later.
+  int get rubysEarnedThisRun => _rubysEarnedThisRun;
+  int _rubysEarnedThisRun = 0;
+
+  /// Best floor reached this run. Updated when a boss is killed.
+  int get bestFloorReached => _bestFloorReached;
+  int _bestFloorReached = 1;
+
   /// For map overlay: current floor's room graph.
   List<FloorNode> get floorNodes => _floorNodes;
 
@@ -112,6 +124,17 @@ class DungeonGame extends FlameGame
 
   /// Apply chosen chest reward to player. Call after user picks one of the 3 cards.
   void applyChestReward(ChestReward reward) {
+    _applyRewardToPlayer(reward);
+    chestRewardChoiceNotifier.value = null;
+  }
+
+  /// Apply chosen boss reward to player. Call after user picks one of the 3 cards.
+  void applyBossReward(ChestReward reward) {
+    _applyRewardToPlayer(reward);
+    bossRewardChoiceNotifier.value = null;
+  }
+
+  void _applyRewardToPlayer(ChestReward reward) {
     switch (reward.type) {
       case 'max_hp':
         _player.stats.runMaxHpBonus += reward.value;
@@ -132,7 +155,23 @@ class DungeonGame extends FlameGame
       default:
         _player.stats.heal(reward.value);
     }
-    chestRewardChoiceNotifier.value = null;
+  }
+
+  /// Called when a boss enemy dies. Grant rubys, show reward choice, update best floor.
+  void onBossKilled() {
+    _rubysEarnedThisRun += 1;
+    if (_currentFloor > _bestFloorReached) _bestFloorReached = _currentFloor;
+    final pool = Services.configLoader.chestRewards;
+    final chosen = <ChestReward>[];
+    final indices = List.generate(pool.length, (i) => i)..shuffle(_random);
+    for (var i = 0; i < 3 && i < indices.length; i++) {
+      chosen.add(pool[indices[i]]);
+    }
+    if (chosen.isNotEmpty) bossRewardChoiceNotifier.value = chosen;
+  }
+
+  bool _isBossAlive() {
+    return world.children.whereType<EnemyComponent>().any((e) => e.isBoss && e.isAlive);
   }
 
   @override
@@ -158,6 +197,7 @@ class DungeonGame extends FlameGame
   /// Called when player hits a door zone. Transition to connected room or next floor.
   void onDoorTriggered(String direction) {
     final node = _floorNodes[_currentRoomIndex];
+    if (node.isBoss && _isBossAlive()) return;
     if (_currentRoomHadChest) _roomsSinceLucky = 0;
     final nextIndex = node.neighbors[direction];
     if (nextIndex != null && nextIndex >= 0 && nextIndex < _floorNodes.length) {
@@ -174,7 +214,10 @@ class DungeonGame extends FlameGame
     await Services.configLoader.loadRoomPresets();
     await Services.configLoader.loadEnemyArchetypes();
     await Services.configLoader.loadChestRewards();
+    await Services.configLoader.loadBossArchetypes();
     _currentFloor = 1;
+    _bestFloorReached = 1;
+    _rubysEarnedThisRun = 0;
     _previousFloorHadLucky = false;
     _roomsSinceLucky = 4;
     _floorNodes = FloorGenerator(_random).generate(_currentFloor,
@@ -238,9 +281,6 @@ class DungeonGame extends FlameGame
     if (!isCombat && !isBoss) return;
 
     final config = Services.configLoader.gameConfig;
-    final archetypes = Services.configLoader.archetypesForFloor(_currentFloor);
-    if (archetypes.isEmpty) return;
-
     final roomW = node.definition.widthTiles * tileSize;
     final roomH = node.definition.heightTiles * tileSize;
     const margin = 2.0;
@@ -253,9 +293,25 @@ class DungeonGame extends FlameGame
     final hpScale = config.hpScaleForFloor(_currentFloor);
     final damageScale = config.damageScaleForFloor(_currentFloor);
 
-    final count = isBoss
-        ? 1
-        : (wave + _currentFloor + _random.nextInt(2)).clamp(1, 10);
+    if (isBoss) {
+      final boss = Services.configLoader.getBossForFloor(_currentFloor);
+      if (boss == null) return;
+      final x = minX + _random.nextDouble() * (maxX - minX);
+      final y = minY + _random.nextDouble() * (maxY - minY);
+      world.add(EnemyComponent(
+        position: Vector2(x, y),
+        archetype: boss.toEnemyArchetype(),
+        hpScale: hpScale,
+        damageScale: damageScale,
+        isBoss: true,
+      ));
+      return;
+    }
+
+    final archetypes = Services.configLoader.archetypesForFloor(_currentFloor);
+    if (archetypes.isEmpty) return;
+
+    final count = (wave + _currentFloor + _random.nextInt(2)).clamp(1, 10);
     for (var i = 0; i < count; i++) {
       final archetype = archetypes[_random.nextInt(archetypes.length)];
       final x = minX + _random.nextDouble() * (maxX - minX);
