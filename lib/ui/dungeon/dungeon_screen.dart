@@ -30,6 +30,8 @@ class _DungeonScreenState extends State<DungeonScreen> {
   @override
   void dispose() {
     _game.currentRoomNotifier.dispose();
+    _game.playerHpNotifier.dispose();
+    _game.playerMaxHpNotifier.dispose();
     super.dispose();
   }
 
@@ -62,9 +64,76 @@ class _DungeonScreenState extends State<DungeonScreen> {
                 alignment: Alignment.topLeft,
                 child: Padding(
                   padding: const EdgeInsets.all(8),
-                  child: IconButton(
-                    icon: const Icon(Icons.arrow_back, color: Colors.white),
-                    onPressed: () => Navigator.of(context).pop(),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.arrow_back, color: Colors.white),
+                        onPressed: () => Navigator.of(context).pop(),
+                      ),
+                      ValueListenableBuilder<double>(
+                        valueListenable: _game.playerMaxHpNotifier,
+                        builder: (context, maxHp, _) {
+                          return ValueListenableBuilder<double>(
+                            valueListenable: _game.playerHpNotifier,
+                            builder: (context, hp, _) {
+                              final ratio = maxHp > 0 ? (hp / maxHp).clamp(0.0, 1.0) : 0.0;
+                              return SizedBox(
+                                width: 120,
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                                  children: [
+                                    Text(
+                                      'HP ${hp.toInt()}/${maxHp.toInt()}',
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    ClipRRect(
+                                      borderRadius: BorderRadius.circular(4),
+                                      child: LinearProgressIndicator(
+                                        value: ratio,
+                                        minHeight: 8,
+                                        backgroundColor: Colors.white24,
+                                        valueColor: ratio > 0.25
+                                            ? const AlwaysStoppedAnimation<Color>(Colors.red)
+                                            : const AlwaysStoppedAnimation<Color>(Colors.redAccent),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            SafeArea(
+              child: Align(
+                alignment: Alignment.bottomRight,
+                child: Padding(
+                  padding: const EdgeInsets.only(right: 24, bottom: 32),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      _ActionButton(
+                        label: 'Dash',
+                        onPressed: () => _game.dash(),
+                      ),
+                      const SizedBox(width: 16),
+                      _ActionButton(
+                        label: 'Attack',
+                        onPressed: () => _game.attack(),
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -96,6 +165,36 @@ class _DungeonScreenState extends State<DungeonScreen> {
               ),
           ],
         ],
+      ),
+    );
+  }
+}
+
+class _ActionButton extends StatelessWidget {
+  const _ActionButton({required this.label, required this.onPressed});
+
+  final String label;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.black54,
+      borderRadius: BorderRadius.circular(8),
+      child: InkWell(
+        onTap: onPressed,
+        borderRadius: BorderRadius.circular(8),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+          child: Text(
+            label,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
       ),
     );
   }

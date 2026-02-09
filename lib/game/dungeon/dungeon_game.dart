@@ -5,6 +5,7 @@ import 'package:flame/game.dart';
 import 'package:flutter/foundation.dart';
 
 import 'package:roguelike_dungeon/data/floor_node.dart';
+import 'package:roguelike_dungeon/game/dungeon/attack_hitbox_component.dart';
 import 'package:roguelike_dungeon/game/dungeon/dungeon_room_component.dart';
 import 'package:roguelike_dungeon/game/entities/player_component.dart';
 import 'package:roguelike_dungeon/game/rooms/floor_generator.dart';
@@ -32,11 +33,41 @@ class DungeonGame extends FlameGame
   /// Notifies when room changes so map overlay can rebuild.
   final ValueNotifier<int> currentRoomNotifier = ValueNotifier(0);
 
+  /// For health UI. Updated each frame from player stats.
+  final ValueNotifier<double> playerHpNotifier = ValueNotifier(100);
+  final ValueNotifier<double> playerMaxHpNotifier = ValueNotifier(100);
+
   int get currentFloor => _currentFloor;
 
   /// Called from overlay (virtual joystick).
   void setMovementDirection(double dx, double dy) {
     _player.movementDirection = Vector2(dx, dy);
+  }
+
+  /// Called from overlay (attack button). Spawns melee hitbox in front of player.
+  void attack() {
+    if (!_player.canAttack) return;
+    _player.performAttack();
+    final pos = _player.attackSpawnPosition;
+    const hitboxSize = 28.0;
+    world.add(AttackHitboxComponent(
+      position: pos,
+      size: Vector2.all(hitboxSize),
+      damage: _player.stats.baseDamage,
+    ));
+  }
+
+  /// Called from overlay (dash button).
+  void dash() {
+    _player.performDash();
+  }
+
+  @override
+  void update(double dt) {
+    super.update(dt);
+    _player.tickCooldowns(dt);
+    playerHpNotifier.value = _player.stats.hp;
+    playerMaxHpNotifier.value = _player.stats.maxHp;
   }
 
   /// Called when player hits a door zone. Transition to connected room or next floor.
