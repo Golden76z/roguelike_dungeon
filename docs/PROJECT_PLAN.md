@@ -103,30 +103,30 @@ Use this section as the reference for *what* to build. Do not contradict these i
 
 - [x] Initialize Git repository (already done)
 - [ ] Confirm Flutter & Dart versions; set supported Android/iOS min versions (e.g. Android API 21+, iOS 12+)
-- [ ] Lock landscape + fullscreen in app (Android & iOS)
+- [x] Lock landscape + fullscreen in app (Android & iOS)
 - [x] Design questions answered in `OPEN_QUESTIONS.md`; decisions reflected above
-- [ ] Set up CI or script: at least `flutter analyze` + `flutter test`
+- [x] Set up CI or script: at least `flutter analyze` + `flutter test` (tool/setup.sh)
 
 ---
 
 ## Chapter 1 – Project scaffolding & architecture
 
-- [ ] Ensure Flutter project has Flame integrated (`pubspec.yaml`)
-- [ ] Create base `FlameGame` subclass as game root; attach via `GameWidget` in Flutter
-- [ ] Define folder structure: `lib/app/`, `lib/game/`, `lib/game/entities/`, `lib/game/rooms/`, `lib/game/systems/`, `lib/data/`, `lib/services/`, `lib/ui/`
-- [ ] Introduce data-driven config: load at least one sample from **JSON or YAML** (e.g. enemy or room definition); establish paths like `assets/data/`
-- [ ] Add a simple service locator or DI (e.g. for save service, config loader) so scenes can access shared services
+- [x] Ensure Flutter project has Flame integrated (`pubspec.yaml`)
+- [x] Create base `FlameGame` subclass as game root; attach via `GameWidget` in Flutter
+- [x] Define folder structure: `lib/app/`, `lib/game/`, `lib/game/entities/`, `lib/game/rooms/`, `lib/game/systems/`, `lib/data/`, `lib/services/`, `lib/ui/`
+- [x] Introduce data-driven config: load at least one sample from **JSON or YAML** (e.g. enemy or room definition); establish paths like `assets/data/`
+- [x] Add a simple service locator or DI (e.g. for save service, config loader) so scenes can access shared services
 
 ---
 
 ## Chapter 2 – Main menu & navigation shell
 
-- [ ] Implement **main menu** screen with buttons: **New Game**, **Continue**, **Settings**
-- [ ] Layout: menu panel occupies **~30–40% of the screen** (landscape); **fullscreen** game; use **placeholder background image** (you will replace with your art)
-- [ ] **New Game** → navigate to **hub** scene (default player, hub state)
+- [x] Implement **main menu** screen with buttons: **New Game**, **Continue**, **Settings**
+- [x] Layout: menu panel occupies **~30–40% of the screen** (landscape); **fullscreen** game; use **placeholder background image** (you will replace with your art)
+- [x] **New Game** → navigate to **hub** scene (default player, hub state)
 - [ ] **Continue** → load from one of **4 save slots** (e.g. most recent or slot picker); stub save data if needed
-- [ ] **Settings** screen: stubs for **audio** (music/SFX toggles), **controls** (future: joystick size/position), **graphics** (e.g. quality, damage numbers)
-- [ ] Ensure app starts in **landscape** and stays **fullscreen** on Android & iOS
+- [x] **Settings** screen: stubs for **audio** (music/SFX toggles), **controls** (future: joystick size/position), **graphics** (e.g. quality, damage numbers)
+- [x] Ensure app starts in **landscape** and stays **fullscreen** on Android & iOS
 
 ---
 

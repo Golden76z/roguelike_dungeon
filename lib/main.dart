@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:roguelike_dungeon/app/roguelike_app.dart';
+import 'package:roguelike_dungeon/services/services.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -11,6 +12,8 @@ Future<void> main() async {
     DeviceOrientation.landscapeRight,
   ]);
   await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+
+  await Services.init();
 
   runApp(const RoguelikeApp());
 }

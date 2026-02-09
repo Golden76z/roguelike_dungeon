@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import 'package:roguelike_dungeon/ui/hub/hub_screen.dart';
+import 'package:roguelike_dungeon/ui/settings/settings_screen.dart';
+
 /// Main menu with New Game / Continue / Settings.
 /// Layout: panel takes ~30–40% of the screen width over a background.
 class MainMenuScreen extends StatelessWidget {
@@ -46,21 +49,29 @@ class MainMenuScreen extends StatelessWidget {
                   _MenuButton(
                     label: 'New Game',
                     onPressed: () {
-                      // TODO(ch2): Navigate to hub / game shell.
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => const HubScreen(),
+                        ),
+                      );
                     },
                   ),
                   const SizedBox(height: 12),
                   _MenuButton(
                     label: 'Continue',
                     onPressed: () {
-                      // TODO(ch12): Open save slot selection / auto-continue.
+                      // TODO(ch12): Open save slot selection / load and go to hub.
                     },
                   ),
                   const SizedBox(height: 12),
                   _MenuButton(
                     label: 'Settings',
                     onPressed: () {
-                      // TODO(ch2): Open settings screen.
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => const SettingsScreen(),
+                        ),
+                      );
                     },
                   ),
                 ],

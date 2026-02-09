@@ -1,0 +1,5 @@
+{
+  "tileSize": 32,
+  "maxFloors": 25,
+  "bossEveryFloors": 5
+}
