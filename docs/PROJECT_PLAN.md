@@ -132,16 +132,16 @@ Use this section as the reference for *what* to build. Do not contradict these i
 
 ## Chapter 3 – Hub world
 
-- [ ] Implement **top-down player** in hub: movement only (no combat in hub); use **virtual joystick** for movement (same control scheme as dungeon for consistency)
-- [ ] Create **hub tilemap** (32×32) with **collision layer**; load from asset or from JSON map data
-- [ ] Add **interactable objects** with collision or trigger zones:
+- [x] Implement **top-down player** in hub: movement only (no combat in hub); use **virtual joystick** for movement (same control scheme as dungeon for consistency)
+- [x] Create **hub tilemap** (32×32) with **collision layer**; load from asset or from JSON map data
+- [x] Add **interactable objects** with collision or trigger zones:
   - **Shop** (buy items, keys; spend gold)
   - **Hunter log** (opens Hunter Log menu; spend rubys)
   - **Character gallery** (view/unlock playable characters; unlock with **coins**)
   - **Best-floor display** (show best floor reached + **character icon** that achieved it)
   - **Dungeon door** (enter dungeon; trigger transition animation + zoom)
-- [ ] Interaction: show **prompt** when player is near (e.g. “Press to interact”); open appropriate UI or transition
-- [ ] Hub camera: simple follow or fixed so the whole hub is playable; no dungeon logic here
+- [x] Interaction: show **prompt** when player is near (e.g. “Press to interact”); open appropriate UI or transition
+- [x] Hub camera: simple follow or fixed so the whole hub is playable; no dungeon logic here
 
 ---
 
