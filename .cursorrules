@@ -1,0 +1,91 @@
+## Roguelike Dungeon – Cursor Rules
+
+### 1. General Principles
+
+- Prefer **simple, data‑driven designs** so that adding new rooms, enemies, items, or floors requires mainly editing config/data, not core code.
+- Optimize for **maintainability and extensibility first**, then micro‑optimize only hot paths after profiling.
+- Keep **game logic deterministic** where reasonable (especially combat, damage, and room generation) to make debugging easier.
+- Favor **composition over inheritance** for gameplay entities (player, enemies, projectiles, interactables).
+
+### 2. Project Structure
+
+- Keep top‑level Dart code under `lib/` organized roughly as:
+  - `lib/main.dart`: app entrypoint and `runApp` only.
+  - `lib/app/`: root widgets, navigation, and shell (e.g. switching between menu, hub, game).
+  - `lib/game/`: Flame `Game` implementation, components, and systems.
+  - `lib/game/rooms/`: room definitions, presets, and generation logic.
+  - `lib/game/entities/`: player, enemies, projectiles, interactables.
+  - `lib/game/systems/`: combat, movement, spawn systems, AI behaviors.
+  - `lib/data/`: configuration (JSON/YAML or strongly‑typed config classes) for enemies, rooms, loot tables, perks.
+  - `lib/services/`: save/load, settings, logging, asset loading helpers.
+  - `lib/ui/`: non‑game UI (menus, overlays, HUD, hunter log, settings).
+- Keep platform‑specific code changes minimal; prefer Flutter/Flame‑level abstractions.
+
+### 3. Flutter & Flame Usage
+
+- Use a **single primary `FlameGame` subclass** as the core game, with clear states (hub, dungeon, menus, overlays) rather than many separate games.
+- Use **Flame components** instead of `setState` where possible for in‑game elements; reserve classic Flutter widgets for menus, settings, and HUDs.
+- For overlays (e.g. map, hunter log), use **Flame overlays / Flutter widgets on top** of the game via `GameWidget` overlays mechanism.
+- Avoid per‑frame allocations in `update` where possible; re‑use objects and pre‑allocate lists for hot paths (movement, collision, AI).
+- Use **`Vector2` and Flame’s math utilities** for positions and velocities; avoid manual doubles everywhere.
+
+### 4. Performance Guidelines
+
+- Target **60 FPS** on mid‑range Android devices; avoid heavy work in the main `update` loop.
+- Do not perform synchronous file I/O, JSON parsing, or heavy allocations inside `update`; load and cache config up‑front or asynchronously at scene transitions.
+- Prefer **simple collision systems** (AABB, circle) before introducing more complex physics; use Flame’s collision APIs when possible.
+- Batch related operations (e.g. enemy AI, projectiles) and avoid deeply nested loops when the number of entities can grow.
+- Keep **logging/debug prints** behind flags and remove or gate them for production builds.
+
+### 5. Data‑Driven Design
+
+- Represent enemies, rooms, floors, loot pools, and perks as **config structures**:
+  - Each enemy archetype: stats, sprite/animation keys, behavior flags (melee/ranged, movement style, abilities).
+  - Each room preset: layout identifier, allowed doors (top/bottom/left/right), floor ranges, difficulty tier, enemy pool references.
+  - Each floor: number of rooms, enemy pools, lucky room chances, boss info.
+  - Each loot pool: weighted entries pointing to item/perk IDs.
+- Design systems such that **adding a new archetype or room is done by editing config and providing art**, not by branching logic.
+
+### 6. Code Style
+
+- Follow **Flutter lints** and keep files focused:
+  - One main class or cohesive set of closely related classes per file.
+  - Short functions where possible; extract helpers instead of large `update` methods.
+- Use **immutable data classes** (e.g. `const` constructors, `copyWith`) for configuration and settings.
+- Prefer **explicit types** for public APIs and core game structures.
+- Name components clearly:
+  - Suffix `Component` for Flame components (`PlayerComponent`, `EnemyComponent`).
+  - Suffix `System` for logic managers (`CombatSystem`, `RoomGenerationSystem`).
+  - Suffix `Config` or `Definition` for data/config types.
+
+### 7. Testing & Validation
+
+- Add **unit tests** for:
+  - Room generation rules (doors, floor ranges, lucky room blocks).
+  - Enemy spawn logic per floor and room type.
+  - Damage, health, and simple combat resolution.
+  - Save/load schema (round‑trip tests).
+- Keep test data small but representative; avoid depending on real art assets for tests.
+
+### 8. Saving, Loading & Versioning
+
+- Centralize save/load logic in a dedicated service (e.g. `SaveService`) under `lib/services/`.
+- Use **versioned save schemas** so fields can be added in future without breaking old saves.
+- Keep save data minimal: **only store what cannot be reconstructed** from configs (player progress, inventory, current floor/room, hub state, settings).
+
+### 9. Mobile UX Guidelines
+
+- Design **touch targets generously** (min ~48dp) for on‑screen controls and buttons.
+- Keep HUD and overlays unobtrusive during combat; avoid covering the player area with UI.
+- Ensure overlays like the dungeon map and hunter log **don’t consume game controls** when they shouldn’t (input transparency where required).
+
+### 10. How the AI Should Work in This Repo
+
+- Always:
+  - Respect this rules file when creating or modifying code.
+  - Prefer extending existing systems & config over adding special‑case branches.
+  - Keep features behind clear interfaces to allow future replacement (e.g. different room generators, AI behaviors).
+- When in doubt:
+  - Choose the **simpler, more composable** solution.
+  - Add TODO comments only when they’re actionable and tied to a chapter in `docs/PROJECT_PLAN.md`.
+
